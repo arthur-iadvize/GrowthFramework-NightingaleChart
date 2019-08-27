@@ -7,45 +7,56 @@ const canvas = d3
   .attr("width", size)
   .attr("height", size);
 
-canvas.append("g").attr("transform", `translate( ${size / 2}, ${size / 2})`);
+canvas
+  .append("g")
+  .attr("id", "nightingale")
+  .attr("transform", `translate( ${size / 2}, ${size / 2})`);
 
-let previousAngle = null;
+const skills = [
+  { category: "B" },
+  { category: "A" },
+  { category: "D" },
+  { category: "A" },
+  { category: "D" },
+  { category: "E" }
+];
 
-const arcs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-
-const colorScale = d3
-  .scaleLinear()
-  .domain([arcs[0], arcs[arcs.length - 1]])
-  .range([0, 99]);
+const levels = [0, 1, 2, 3, 4, 5];
 
 const d3Arc = d3.arc;
 
-var rainbow = d3
+const padding = 4;
+
+const scale = d3
+  .scaleOrdinal()
+  .domain(["A", "B", "C", "D"])
+  .range(["blue", "yellow", "red", "green"]);
+/*var rainbow = d3
   .scaleSequential()
-  .interpolator(d3.interpolateLab("coral", "orange"))
-  .domain([0, 99]);
+  .interpolator(d3.interpolateLab("black", "orange"))
+  .domain([0, 99]);*/
+for (let [index, value] of skills.entries()) {
+  const skill = d3
+    .select("#nightingale")
+    .append("g")
+    .attr("class", "skill");
 
-for (let i of arcs) {
-  // const color = randomColor();
-  const endAngle = (Math.PI * 2) / (arcs.length / i);
-  const arc = d3Arc()
-    .innerRadius((size / 2) * 0.7)
-    .outerRadius(size / 2)
-    .startAngle(previousAngle || 0)
-    .endAngle(endAngle)
-    .padAngle(Math.PI / size)
-    .cornerRadius(Math.PI * 2);
-
-  previousAngle = endAngle;
-  d3.select("g")
-    .append("path")
-    .attr("d", arc)
-    .style("fill", rainbow(colorScale(i)));
+  for (let l of levels) {
+    //console.log((Math.PI * 2 * 250) / 90);
+    const levelArc = d3Arc()
+      .innerRadius((size / 2) * (l / levels.length))
+      .outerRadius((size / 2) * ((l + 1) / levels.length) - padding)
+      .startAngle(((Math.PI * 2) / skills.length) * index)
+      .endAngle(((Math.PI * 2) / skills.length) * (index + 1))
+      .padAngle(Math.PI / 60 / l)
+      .cornerRadius(Math.PI * 2);
+    skill
+      .append("path")
+      .attr("class", "level")
+      .attr("d", levelArc)
+      .style("fill", scale(value.category));
+  }
 }
 
-var scale = d3
-  .scaleOrdinal()
-  .domain(["A", "B"])
-  .range(["Prout", "Mammouth"]);
 console.log(scale("A"));
 console.log(scale("B"));
